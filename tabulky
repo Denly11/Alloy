@@ -1,0 +1,9 @@
+sig uživatel{}
+sig hodnoty{
+kalorie: one Int,
+bílkoviny: one Int,
+sacharidy: one Int,
+tuky: one Int}
+sig jídlo{
+zápis: one uživatel,
+kcalHodnota: one hodnoty}
