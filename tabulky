@@ -1,9 +1,21 @@
 sig uživatel{}
-sig hodnoty{
-kalorie: one Int,
-bílkoviny: one Int,
-sacharidy: one Int,
-tuky: one Int}
-sig jídlo{
-zápis: one uživatel,
-kcalHodnota: one hodnoty}
+
+sig hodnoty
+{
+	kalorie: one Int,
+	bílkoviny: one Int,
+	sacharidy: one Int,
+	tuky: one Int
+}
+
+sig jídlo
+{
+	zápis: one uživatel,
+	kcalHodnota: one hodnoty
+}
+
+fact prirozena_cisla
+{
+    all h : hodnoty | h.kalorie >= 0 and h.bílkoviny >= 0 
+                       and h.sacharidy >= 0 and h.tuky >= 0
+} //deklaruju podmínku která stanovuje že všechny fidy pro atomy z hodnoty(které pojmenujeme h) musejí mít kalorie(h.kalorie) musí být větší nebo se robnat (>=0)
