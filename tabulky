@@ -19,3 +19,8 @@ fact prirozena_cisla
     all h : hodnoty | h.kalorie >= 0 and h.bílkoviny >= 0 
                        and h.sacharidy >= 0 and h.tuky >= 0
 } //deklaruju podmínku která stanovuje že všechny fidy pro atomy z hodnoty(které pojmenujeme h) musejí mít kalorie(h.kalorie) musí být větší nebo se robnat (>=0)
+
+fact součet_maker_je_roven_kaloriim
+{
+	all h : hodnoty | h.kalorie = h.bílkoviny.plus[h.sacharidy].plus[h.tuky]
+} //řeší to že hodnota kalorii se musí rovnat součtu všech ostatních hodnot dohromady
