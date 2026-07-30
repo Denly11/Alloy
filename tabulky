@@ -24,3 +24,8 @@ fact součet_maker_je_roven_kaloriim
 {
 	all h : hodnoty | h.kalorie = h.bílkoviny.plus[h.sacharidy].plus[h.tuky]
 } //řeší to že hodnota kalorii se musí rovnat součtu všech ostatních hodnot dohromady
+
+fun celkoveKolorieProJednohoUživatele [u : uživatel] : Int //u z uživatel s návratovým typem Int
+{
+	(zápis.u.kcalHodnota.kalorie).sum
+}
