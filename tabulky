@@ -25,7 +25,38 @@ fact součet_maker_je_roven_kaloriim
 	all h : hodnoty | h.kalorie = h.bílkoviny.plus[h.sacharidy].plus[h.tuky]
 } //řeší to že hodnota kalorii se musí rovnat součtu všech ostatních hodnot dohromady
 
-fun celkoveKolorieProJednohoUživatele [u : uživatel] : Int //u z uživatel s návratovým typem Int
+
+fun celkoveKalorieProJednohoUživatele [u : uživatel] : Int //u z uživatel s návratovým typem Int
 {
 	(zápis.u.kcalHodnota.kalorie).sum
+}
+
+//-----Funkce přídání jídla-----
+
+var sig zapsané in jídlo {} //měnitelná podmnožina jídel jménem "zapsané"
+
+fact prvnotníStav //prostě jen dekraluju pravidlo
+{
+	no zapsané
+}
+
+pred přidáníJídla [j : jídlo] //jídlo se přidá
+{
+	j not in zapsané//pokud tam už není
+	zapsané' = zapsané + j //přidá se do zapsane
+}
+
+pred žádnáZměna//nic se nezmění
+{
+	zapsané' = zapsané
+}
+
+fact přesun//tady se využije to přidáníJídla a žádnáZmě
+{
+	always
+		(
+			(
+				some j : jídlo | přidáníJídla[j] or žádnáZměna
+			)
+		)
 }
