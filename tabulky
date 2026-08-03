@@ -1,3 +1,5 @@
+//----Deklarace----
+
 sig uživatel{}
 
 sig hodnoty
@@ -28,7 +30,7 @@ fact součet_maker_je_roven_kaloriim
 
 fun celkoveKalorieProJednohoUživatele [u : uživatel] : Int //u z uživatel s návratovým typem Int
 {
-	(zápis.u.kcalHodnota.kalorie).sum
+	((zápis.u) & zapsané).kcalHodnota.kalorie.sum//průnik všech(zápis.u) a  zapsaných jídel(zapsané)
 }
 
 //-----Funkce přídání jídla-----
@@ -46,6 +48,13 @@ pred přidáníJídla [j : jídlo] //jídlo se přidá
 	zapsané' = zapsané + j //přidá se do zapsane
 }
 
+pred odebráníJídla [zj: zapsané]
+{
+	zj in zapsané
+	zapsané' = zapsané - zj
+}
+
+
 pred žádnáZměna//nic se nezmění
 {
 	zapsané' = zapsané
@@ -56,7 +65,11 @@ fact přesun//tady se využije to přidáníJídla a žádnáZmě
 	always
 		(
 			(
-				some j : jídlo | přidáníJídla[j] or žádnáZměna
+				some j : jídlo | přidáníJídla[j] or odebráníJídla[j] or žádnáZměna
 			)
 		)
 }
+
+//----Run----
+
+run example {} for exactly 3 uživatel, exactly 3 jídlo, exactly 2 hodnoty, 9 Int
