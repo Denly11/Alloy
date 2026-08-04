@@ -1,75 +1,75 @@
 //----Deklarace----
 
-sig uživatel{}
+sig user{}
 
-sig hodnoty
+sig value
 {
-	kalorie: one Int,
-	bílkoviny: one Int,
-	sacharidy: one Int,
-	tuky: one Int
+	calories: one Int,
+	protein: one Int,
+	carbohydrates: one Int,
+	fats: one Int
 }
 
-sig jídlo
+sig food_in_database
 {
-	zápis: one uživatel,
-	kcalHodnota: one hodnoty
+	log: one user,
+	caloricValue: one value
 }
 
-fact prirozena_cisla
+fact natural_numbers
 {
-    all h : hodnoty | h.kalorie >= 0 and h.bílkoviny >= 0 
-                       and h.sacharidy >= 0 and h.tuky >= 0
+    all v : value | v.calories >= 0 and v.protein >= 0 
+                       and v.carbohydrates >= 0 and v.fats >= 0
 } //deklaruju podmínku která stanovuje že všechny fidy pro atomy z hodnoty(které pojmenujeme h) musejí mít kalorie(h.kalorie) musí být větší nebo se robnat (>=0)
 
-fact součet_maker_je_roven_kaloriim
+fact sum_of_all_macros_is_equal_to_calories
 {
-	all h : hodnoty | h.kalorie = h.bílkoviny.plus[h.sacharidy].plus[h.tuky]
+	all v : value  | v.calories = v.protein.plus[v.carbohydrates].plus[v.fats]
 } //řeší to že hodnota kalorii se musí rovnat součtu všech ostatních hodnot dohromady
 
 
-fun celkoveKalorieProJednohoUživatele [u : uživatel] : Int //u z uživatel s návratovým typem Int
+fun sum_of_all_calories_for_user [u : user] : Int //u z uživatel s návratovým typem Int
 {
-	((zápis.u) & zapsané).kcalHodnota.kalorie.sum//průnik všech(zápis.u) a  zapsaných jídel(zapsané)
+	((log.u) & logged).caloricValue.calories.sum//průnik všech(zápis.u) a  zapsaných jídel(zapsané)
 }
 
 //-----Funkce přídání jídla-----
 
-var sig zapsané in jídlo {} //měnitelná podmnožina jídel jménem "zapsané"
+var sig logged in food_in_database {} //měnitelná podmnožina jídel jménem "zapsané"
 
-fact prvnotníStav //prostě jen dekraluju pravidlo
+fact initial_state //prostě jen dekraluju pravidlo
 {
-	no zapsané
+	no logged
 }
 
-pred přidáníJídla [j : jídlo] //jídlo se přidá
+pred log_food [f : food_in_database] //jídlo se přidá
 {
-	j not in zapsané//pokud tam už není
-	zapsané' = zapsané + j //přidá se do zapsane
+	f not in logged//pokud tam už není
+	logged' =logged + f //přidá se do zapsane
 }
 
-pred odebráníJídla [zj: zapsané]
+pred remove_food [l: logged]
 {
-	zj in zapsané
-	zapsané' = zapsané - zj
+	l in logged
+	logged' = logged - l
 }
 
 
-pred žádnáZměna//nic se nezmění
+pred no_change//nic se nezmění
 {
-	zapsané' = zapsané
+	logged' = logged
 }
 
-fact přesun//tady se využije to přidáníJídla a žádnáZmě
+fact state_transition//tady se využije to přidáníJídla a žádnáZmě
 {
 	always
 		(
 			(
-				some j : jídlo | přidáníJídla[j] or odebráníJídla[j] or žádnáZměna
+				some f : food_in_database | log_food[f] or remove_food[f] or no_change
 			)
 		)
 }
 
 //----Run----
 
-run example {} for exactly 3 uživatel, exactly 3 jídlo, exactly 2 hodnoty, 9 Int
+run example {} for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int
