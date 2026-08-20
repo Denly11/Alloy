@@ -1,4 +1,4 @@
-//----Deklarace----
+//----Declarations----
 
 sig user{}
 
@@ -20,12 +20,13 @@ fact natural_numbers
 {
     all v : value | v.calories >= 0 and v.protein >= 0 
                        and v.carbohydrates >= 0 and v.fats >= 0
-} //deklaruju podmínku která stanovuje že všechny fidy pro atomy z hodnoty(které pojmenujeme h) musejí mít kalorie(h.kalorie) musí být větší nebo se robnat (>=0)
+} //declaring that all fields of signature value mush have value equal or higher than 0
+
 
 fact sum_of_all_macros_is_equal_to_calories
 {
 	all v : value  | v.calories = v.protein.plus[v.carbohydrates].plus[v.fats]
-} //řeší to že hodnota kalorii se musí rovnat součtu všech ostatních hodnot dohromady
+} //declaring that calories, field of signature value, must be equal to toral sum of values of all of the other fields of signature value
 
 
 fun sum_of_all_calories_for_user [u : user] : Int //u z uživatel s návratovým typem Int
@@ -33,7 +34,7 @@ fun sum_of_all_calories_for_user [u : user] : Int //u z uživatel s návratovým
 	((log.u) & logged).caloricValue.calories.sum//průnik všech(zápis.u) a  zapsaných jídel(zapsané)
 }
 
-//-----Funkce přídání jídla-----
+//-----Functions for manipulation with foods-----
 
 var sig logged in food_in_database {} //měnitelná podmnožina jídel jménem "zapsané"
 
