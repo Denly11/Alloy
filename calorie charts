@@ -1,7 +1,8 @@
 //----Declarations----
 
-sig user{
-var totat_calories: one Int
+sig user
+{
+	var totat_calories: one Int
 }
 
 sig value
@@ -14,7 +15,6 @@ sig value
 
 sig food_in_database
 {
-	log: one user,
 	caloricValue: one value
 }
 
@@ -33,12 +33,16 @@ fact sum_of_all_macros_is_equal_to_calories
 
 fun sum_of_all_calories_for_user [u : user] : Int //"u" from user with int type
 {
-	((log.u) & logged).caloricValue.calories.sum//intersection of all foods of one particular user and all foods that has been logged to any user
+	//logged_food_in_database.caloricValue.calories.sum
+	logged.u.caloricValue.calories.sum
 }
 
 //-----Functions for manipulation with foods-----
 
-var sig logged in food_in_database {} //variable subset of sygnature food_in_database, without this foods could not be added/removed in states(by always), but would stay the same
+var sig logged_food_in_database in food_in_database//variable subset of sygnature food_in_database, without this foods could not be added/removed in states(by always), but would stay the same
+{
+	var logged: one user
+} 
 
 fact initial_state //initial state shere no food from database is logged
 {
@@ -47,14 +51,16 @@ fact initial_state //initial state shere no food from database is logged
 
 pred log_food [f : food_in_database] //food will be addted to logged from database
 {
-	f not in logged//pokud tam už není
-	logged' =logged + f //přidá se do zapsane
+	f not in logged_food_in_database//pokud tam už není
+	logged_food_in_database' =logged_food_in_database + f //přidá se do zapsane
+	all other_f : logged_food_in_database | other_f.logged' = other_f.logged//so the owner of the food does not change, bacause the rest does not change so the "f" stays > logged has isers, this will not change for anything but the food given in "f"
 }
 
-pred remove_food [l: logged]
+pred remove_food [l: logged_food_in_database]
 {
-	l in logged
-	logged' = logged - l
+	l in logged_food_in_database
+	logged_food_in_database' = logged_food_in_database - l
+	all other_f :  logged_food_in_database - l | 	other_f.logged' = other_f.logged//all other 
 }
 
 
@@ -67,7 +73,7 @@ fact state_transition//he is selected next step of what will happen
 {
 	always
 		(
-				some f : food_in_database | log_food[f] or remove_food[f] or no_change
+			some f : food_in_database | log_food[f] or remove_food[f] or no_change
 		)
 }
 
