@@ -1,4 +1,5 @@
 //----Declarations----
+
 sig user
 {
     var totat_calories: one Int,
@@ -27,9 +28,13 @@ fact sum_of_all_macros_is_equal_to_calories
 fun sum_of_all_calories_for_user [u : user] : Int //"u" from user with int type
 {
     //logged_food_in_database.caloricValue.calories.sum
-    u.logged.caloricValue.calories.sum
+   // u.logged.caloricValue.calories.sum
+     sum f : u.logged | f.caloricValue.calories
 }
+
+
 //-----Functions for manipulation with foods-----
+
 var sig logged_food_in_database in food_in_database//variable subset of sygnature food_in_database, without this foods could not be added/removed in states(by always), but would stay the same
 {} 
 fact initial_state //initial state shere no food from database is logged
@@ -67,5 +72,41 @@ always//declares all one possible changes that can happen by transiton from one 
         all u : user | u.totat_calories= sum_of_all_calories_for_user[u]
     )
 }
+
+
 //----Run----
-run example {} for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int
+
+run example {} for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int//basic stuff, nothing special
+
+run t1_user_has_more_than_one_food {//can user have more than one food at once?
+    eventually (some u : user | #u.logged > 2)//here you can edit how many atoms of food user has logged
+} for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
+
+run t2_foods_share_same_value {//aloy has problem with adding values of atoms from same signature
+    eventually (some u : user | 
+        #u.logged = 2 and 
+        #(u.logged.caloricValue) = 1 and
+        (u.logged.caloricValue).calories = 120 and
+        sum_of_all_calories_for_user[u] = 240
+    )
+} for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
+
+run t3_foods_CAN_share_same_value {//what if there are two foods with same value and one with unique one
+    eventually (some u : user | 
+        #u.logged = 2 and 
+        #(u.logged.caloricValue) = 1 and
+        (u.logged.caloricValue).calories = 120 and
+        sum_of_all_calories_for_user[u] = 240
+    )
+} for exactly 1 user, exactly 3 food_in_database, exactly 3 value, 9 Int
+
+
+
+
+
+//---Check----
+
+assert kazde_zapsane_jidlo_ma_vlastnika {//can there be logged food without user owning it?, if found then yes, there is <- we don't want that
+    always (all f : logged_food_in_database | some logged.f)
+}
+check kazde_zapsane_jidlo_ma_vlastnika for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int
