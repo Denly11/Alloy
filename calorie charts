@@ -2,66 +2,77 @@
 
 sig user
 {
-    var totat_calories: one Int,
-    var logged: set logged_food_in_database
-}
-sig value
-{
-    calories: one Int,
-    protein: one Int,
-    carbohydrates: one Int,
-    fats: one Int
-}
-sig food_in_database
-{
-    caloricValue: one value
-}
-fact natural_numbers
-{
-    all v : value | v.calories >= 0 and v.protein >= 0 
-                       and v.carbohydrates >= 0 and v.fats >= 0
-} //declaring that all fields of signature value mush have value equal or higher than 0
-fact sum_of_all_macros_is_equal_to_calories
-{
-    all v : value  | v.calories = v.protein.plus[v.carbohydrates].plus[v.fats]
-} //declaring that calories, field of signature value, must be equal to toral sum of values of all of the other fields of signature value
-fun sum_of_all_calories_for_user [u : user] : Int //"u" from user with int type
-{
-    //logged_food_in_database.caloricValue.calories.sum
-   // u.logged.caloricValue.calories.sum
-     sum f : u.logged | f.caloricValue.calories
+	var totat_calories: one Int,
+	var logged: set logged_food_in_database
 }
 
-fact every_value_has_food {
-    all v : value | some f : food_in_database | f.caloricValue = v
-}//declaring that each value is asiggned to its food
+sig value
+{
+	calories: one Int,
+	protein: one Int,
+	carbohydrates: one Int,
+	fats: one Int
+}
+
+sig food_in_database
+{
+	caloricValue: one value
+}
+
+fact natural_numbers //declaring that all fields of signature value mush have value equal or higher than 0
+{
+	all v : value | v.calories >= 0 and
+	v.protein >= 0 and
+	v.carbohydrates >= 0
+	and v.fats >= 0
+} 
+
+fact sum_of_all_macros_is_equal_to_calories //declaring that calories, field of signature value, must be equal to toral sum of values of all of the other fields of signature value
+{
+	all v : value  | v.calories = v.protein.plus[v.carbohydrates].plus[v.fats]
+}
+
+fun sum_of_all_calories_for_user [u : user] : Int //"u" from user with int type
+{
+	sum f : u.logged | f.caloricValue.calories
+}
+
+fact every_value_has_food//declaring that each value is asiggned to its food
+{
+	all v : value | some f : food_in_database | f.caloricValue = v
+}
+
 
 //-----Functions for manipulation with foods-----
 
-var sig logged_food_in_database in food_in_database//variable subset of sygnature food_in_database, without this foods could not be added/removed in states(by always), but would stay the same
-{} 
+var sig logged_food_in_database in food_in_database{} //variable subset of sygnature food_in_database, without this foods could not be added/removed in states(by always), but would stay the same
+
 fact initial_state //initial state shere no food from database is logged
 {
-    no logged
-    no logged_food_in_database
+	no logged
+	no logged_food_in_database
 }
+
 pred log_food [f : food_in_database, u : user]  //food will be addted to logged from database
 {
-    f not in logged_food_in_database//pokud tam už není
-    logged_food_in_database' =logged_food_in_database + f //přidá se do zapsane
-    logged' = logged + (u -> f)//
+	f not in logged_food_in_database //it f is not already in there
+	logged_food_in_database' =logged_food_in_database + f //WILL be added to the logged_food_in_database
+	logged' = logged + (u -> f)//"->" creates bond, that connects two atoms so it is easyer to manipulate and there is no need for more lines of code
 }
+
 pred remove_food [l: logged_food_in_database]
 {
-    l in logged_food_in_database
-    logged_food_in_database' = logged_food_in_database - l
-     logged' = logged - (logged.l -> l)//"->" creates bond, that connects two atoms
+	l in logged_food_in_database
+	logged_food_in_database' = logged_food_in_database - l
+	logged' = logged - (logged.l -> l)
 }
+
 pred no_change//nothing will change
 {
-    logged' = logged
-    no logged_food_in_database
+	logged' = logged
+	no logged_food_in_database
 }
+
 fact state_transition//he is selected next step of what will happen
 {
     always
@@ -69,37 +80,45 @@ fact state_transition//he is selected next step of what will happen
             some f : food_in_database, u : user | log_food[f, u] or remove_food[f] or no_change
         )
 }
-fact {
-always//declares all one possible changes that can happen by transiton from one state to another
-    (
-        all u : user | u.totat_calories= sum_of_all_calories_for_user[u]
-    )
+
+fact
+{
+	always//declares all one possible changes that can happen by transiton from one state to another
+	(
+		all u : user | u.totat_calories= sum_of_all_calories_for_user[u]
+	)
 }
 
 
 //----Run----
 //-is there at least one instance where...
 
-run example {} for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int//basic stuff, nothing special
+run example {}for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int//basic stuff, nothing special
 
-run t1_user_has_more_than_one_food {//can user have more than one food at once?
-    eventually (some u : user | #u.logged > 2)//here you can edit how many atoms of food user has logged
-} for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
+run t1_user_has_more_than_one_food //can user have more than one food at once?
+{
+	eventually (some u : user | #u.logged > 2)//here you can edit how many atoms of food user has logged
+}
+for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
 
-run t2_X_number_of_foods_share_Y_values {//aloy has problem with adding values of atoms from same signature
-    eventually (some u : user | 
-        #u.logged = 2 and //user has "X" atoms in logged
-        #(u.logged.caloricValue) = 1 //number of instances of value for atoms in logged is "Y"
-	//	next two lines can be used to specify the outcome
-      //  and (u.logged.caloricValue).calories = 120 and
-      //  sum_of_all_calories_for_user[u] = 240
+run t2_X_number_of_foods_share_Y_values //aloy has problem with adding values of atoms from same signature
+{
+	eventually
+	(
+		some u : user | 
+		#u.logged = 2 and //user has "X" atoms in logged
+		#(u.logged.caloricValue) = 1 //number of instances of value for atoms in logged is "Y"
+		//	next two lines can be used to specify the outcome
+	      //  and (u.logged.caloricValue).calories = 120 and
+	      //  sum_of_all_calories_for_user[u] = 240
     )
 } for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
 
 
 //---Check----
 //-she is the statement false, if anywhere
-assert kazde_zapsane_jidlo_ma_vlastnika {//can there be logged food without user owning it?, if found then yes, there is <- we don't want that
-    always (all f : logged_food_in_database | some logged.f)
+assert each_looged_food_has_owner //can there be logged food without user owning it?, if found then yes, there is <- we don't want that
+{
+	always (all f : logged_food_in_database | some logged.f)
 }
-check kazde_zapsane_jidlo_ma_vlastnika for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int
+check each_looged_food_has_owner for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int
