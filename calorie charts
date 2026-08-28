@@ -32,6 +32,9 @@ fun sum_of_all_calories_for_user [u : user] : Int //"u" from user with int type
      sum f : u.logged | f.caloricValue.calories
 }
 
+fact every_value_has_food {
+    all v : value | some f : food_in_database | f.caloricValue = v
+}//declaring that each value is asiggned to its food
 
 //-----Functions for manipulation with foods-----
 
@@ -75,37 +78,27 @@ always//declares all one possible changes that can happen by transiton from one 
 
 
 //----Run----
+//-is there at least one instance where...
 
-run example {} for exactly 3 user, exactly 3 food_in_database, exactly 2 value, 9 Int//basic stuff, nothing special
+run example {} for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int//basic stuff, nothing special
 
 run t1_user_has_more_than_one_food {//can user have more than one food at once?
     eventually (some u : user | #u.logged > 2)//here you can edit how many atoms of food user has logged
 } for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
 
-run t2_foods_share_same_value {//aloy has problem with adding values of atoms from same signature
+run t2_X_number_of_foods_share_Y_values {//aloy has problem with adding values of atoms from same signature
     eventually (some u : user | 
-        #u.logged = 2 and 
-        #(u.logged.caloricValue) = 1 and
-        (u.logged.caloricValue).calories = 120 and
-        sum_of_all_calories_for_user[u] = 240
+        #u.logged = 2 and //user has "X" atoms in logged
+        #(u.logged.caloricValue) = 1 //number of instances of value for atoms in logged is "Y"
+	//	next two lines can be used to specify the outcome
+      //  and (u.logged.caloricValue).calories = 120 and
+      //  sum_of_all_calories_for_user[u] = 240
     )
 } for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
 
-run t3_foods_CAN_share_same_value {//what if there are two foods with same value and one with unique one
-    eventually (some u : user | 
-        #u.logged = 2 and 
-        #(u.logged.caloricValue) = 1 and
-        (u.logged.caloricValue).calories = 120 and
-        sum_of_all_calories_for_user[u] = 240
-    )
-} for exactly 1 user, exactly 3 food_in_database, exactly 3 value, 9 Int
-
-
-
-
 
 //---Check----
-
+//-she is the statement false, if anywhere
 assert kazde_zapsane_jidlo_ma_vlastnika {//can there be logged food without user owning it?, if found then yes, there is <- we don't want that
     always (all f : logged_food_in_database | some logged.f)
 }
