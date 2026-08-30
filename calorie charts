@@ -60,30 +60,31 @@ pred log_food [f : food_in_database, u : user]  //food will be addted to logged 
 	logged' = logged + (u -> f)//"->" creates bond, that connects two atoms so it is easyer to manipulate and there is no need for more lines of code
 }
 
-pred remove_food [l: logged_food_in_database]
+pred remove_food [f : food_in_database, u : user]
 {
-	l in logged_food_in_database
-	logged_food_in_database' = logged_food_in_database - l
-	logged' = logged - (logged.l -> l)
+	f in u.logged  
+	logged_food_in_database' = logged_food_in_database - f
+	logged' = logged - (u -> f)
 }
 
 pred no_change//nothing will change
 {
 	logged' = logged
-	no logged_food_in_database
+	logged_food_in_database' =  logged_food_in_database
+	//no logged_food_in_database
 }
 
 fact state_transition//he is selected next step of what will happen
 {
     always
         (
-            some f : food_in_database, u : user | log_food[f, u] or remove_food[f] or no_change
+            some f : food_in_database, u : user | log_food[f, u] or remove_food[f, u] or no_change
         )
 }
 
 fact
 {
-	always//declares all one possible changes that can happen by transiton from one state to another
+	always//declares each possible changes that can happen by transiton from one state to another
 	(
 		all u : user | u.totat_calories= sum_of_all_calories_for_user[u]
 	)
@@ -97,22 +98,47 @@ run example {}for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9
 
 run t1_user_has_more_than_one_food //can user have more than one food at once?
 {
-	eventually (some u : user | #u.logged > 2)//here you can edit how many atoms of food user has logged
+	eventually (some u : user | #u.logged > 1)//here you can edit how many atoms of food user has logged
 }
 for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
 
 run t2_X_number_of_foods_share_Y_values //aloy has problem with adding values of atoms from same signature
 {
-	eventually
+	eventually//it will get there eventualky: here
 	(
 		some u : user | 
-		#u.logged = 2 and //user has "X" atoms in logged
+		#u.logged = 3 and //user has "X" atoms in logged
 		#(u.logged.caloricValue) = 1 //number of instances of value for atoms in logged is "Y"
 		//	next two lines can be used to specify the outcome
 	      //  and (u.logged.caloricValue).calories = 120 and
 	      //  sum_of_all_calories_for_user[u] = 240
     )
-} for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
+} for exactly 3 user, exactly 3 food_in_database, 3 value, 9 Int
+
+run t3_cycle_of_logging_and_removing_foods
+{
+	eventually
+	(
+		one u : user |
+		no u.logged and //start: user has no foods logged
+		after eventually
+		(
+			#u.logged = 1 and //he will get logged one food
+			after eventually
+			(
+				#u.logged = 2 and //then afterwards second food
+				after eventually
+				(
+					#u.logged = 1 and //one logged food will get removed
+					after eventually
+					(
+						no u.logged //then the second logged food will get removed
+					)
+				)
+			)
+		)
+	)
+} for exactly 1 user, exactly 2 food_in_database, exactly 2 value, 9 Int
 
 
 //---Check----
