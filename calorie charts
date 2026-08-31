@@ -2,7 +2,7 @@
 
 sig user
 {
-	var totat_calories: one Int,
+	var total_calories: one Int,
 	var logged: set logged_food_in_database
 }
 
@@ -37,7 +37,7 @@ fun sum_of_all_calories_for_user [u : user] : Int //"u" from user with int type
 	sum f : u.logged | f.caloricValue.calories
 }
 
-fact every_value_has_food//declaring that each value is asiggned to its food
+fact every_value_has_food//declaring that one value can be shared between more foods, so foods can have same value
 {
 	all v : value | some f : food_in_database | f.caloricValue = v
 }
@@ -71,12 +71,11 @@ pred no_change//nothing will change
 {
 	logged' = logged
 	logged_food_in_database' =  logged_food_in_database
-	//no logged_food_in_database
 }
 
 fact state_transition//he is selected next step of what will happen
 {
-    always
+    always//declares each possible changes that can happen by transiton from one state to another
         (
             some f : food_in_database, u : user | log_food[f, u] or remove_food[f, u] or no_change
         )
@@ -84,9 +83,9 @@ fact state_transition//he is selected next step of what will happen
 
 fact
 {
-	always//declares each possible changes that can happen by transiton from one state to another
+	always//value of total calories is declared by using function made for it
 	(
-		all u : user | u.totat_calories= sum_of_all_calories_for_user[u]
+		all u : user | u.total_calories= sum_of_all_calories_for_user[u]
 	)
 }
 
@@ -102,18 +101,18 @@ run t1_user_has_more_than_one_food //can user have more than one food at once?
 }
 for exactly 3 user, exactly 3 food_in_database, exactly 3 value, 9 Int
 
-run t2_X_number_of_foods_share_Y_values //aloy has problem with adding values of atoms from same signature
+run t2_X_number_of_foods_share_Y_values
 {
 	eventually//it will get there eventualky: here
 	(
 		some u : user | 
 		#u.logged = 3 and //user has "X" atoms in logged
-		#(u.logged.caloricValue) = 1 //number of instances of value for atoms in logged is "Y"
+		#(u.logged.caloricValue) = 2 //number of instances of value for atoms in logged is "Y"
 		//	next two lines can be used to specify the outcome
 	      //  and (u.logged.caloricValue).calories = 120 and
 	      //  sum_of_all_calories_for_user[u] = 240
     )
-} for exactly 3 user, exactly 3 food_in_database, 3 value, 9 Int
+} for exactly 3 user, exactly 3 food_in_database, 3 value, 9 Int//if value is exactly 3 but 2 foods share same atom of value then its a problem, so its not exactly
 
 run t3_cycle_of_logging_and_removing_foods
 {
