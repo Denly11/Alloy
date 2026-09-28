@@ -1,3 +1,6 @@
+> [!NOTE]
+> The notes are written in English, but some screenshots show earlier versions of the model with Czech names.
+
 1\.
 
 ![](images/practical/media/image.png){width="6.260416666666667in"
