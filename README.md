@@ -40,9 +40,6 @@ My notes from this project: first the theory behind Alloy, then a practical log 
 
 > **Note:** The notes are written in English, but some screenshots show earlier versions of the model with Czech names.
 
-> [!NOTE]
-> The notes are written in English, but some screenshots show earlier versions of the model with Czech names.
-
 # Acknowledgements
 I would like to thank the Matfyz Summer of Code organizers, the D3S team at Charles University, and the program's supporters, including the RSJ Foundation, for giving me the opportunity to work on this project and gain valuable experience. I am also grateful to my project supervisor for their guidance, feedback, and support throughout the summer.
 Thank you
