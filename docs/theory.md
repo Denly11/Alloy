@@ -1,3 +1,6 @@
+> [!NOTE]
+> The notes are written in English, but some screenshots show earlier versions of the model with Czech names.
+
 Alloy analyzer is something I kind of give commands to, and it checks
 the logic of the software
 
